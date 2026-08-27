@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty Attendance Portal | Student Roll Roster</title>
+  <meta name="description" content="Interactive Modern College Attendance Portal with high-speed 6-column matrix, rapid roll call key-in, post-submit analytics summary, and instant WhatsApp/CSV exports." />
+  
+  <!-- Google Fonts Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <div class="app-container">
+    
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-logo" aria-hidden="true">AP</div>
+        <div class="brand-info">
+          <h1>
+            Attendance Portal
+            <span class="brand-badge">CSE - Sec A</span>
+          </h1>
+          <p class="brand-subtitle">VFSTR University &bull; 21CS204 Design & Analysis of Algorithms &bull; Roster (70)</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="soundToggleBtn" class="btn btn-secondary btn-sm" title="Toggle audio feedback">
+          🔊 Sound ON
+        </button>
+        <button id="themeToggleBtn" class="btn btn-secondary btn-sm" title="Toggle Light/Dark Theme">
+          ☀️ Light
+        </button>
+        <button id="historyBtn" class="btn btn-secondary btn-sm" title="View Saved Sessions">
+          📜 History
+        </button>
+        <button id="headerSubmitBtn" class="btn btn-primary btn-sm" title="Submit & Review Attendance">
+          🚀 Submit Attendance
+        </button>
+      </div>
+    </header>
+
+    <!-- Faculty Portal Session Control Bar (Matches the UI from screenshot) -->
+    <section class="session-bar" aria-label="Session Information">
+      <div class="session-inputs">
+        <!-- Date Control -->
+        <div class="control-group">
+          <label for="dateInput" class="control-label">DATE :</label>
+          <input type="date" id="dateInput" class="input-control" value="2026-08-13" />
+        </div>
+
+        <!-- Tutorial Checkbox -->
+        <label class="tutorial-checkbox-wrapper" for="tutorialCheckbox">
+          <input type="checkbox" id="tutorialCheckbox" />
+          <span class="tutorial-text">TUTORIAL</span>
+        </label>
+
+        <!-- Period Selector -->
+        <div class="control-group">
+          <label for="periodSelect" class="control-label">PERIOD :</label>
+          <select id="periodSelect" class="input-control period-select">
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="1-2 (Lab)">1-2 (Lab)</option>
+            <option value="3-4 (Lab)">3-4 (Lab)</option>
+            <option value="5-6 (Lab)">5-6 (Lab)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Session Controls -->
+      <div class="session-quick-stats">
+        <button id="markAllPresentBtn" class="btn btn-sm btn-success" title="Mark all students as present">
+          ✓ All Present
+        </button>
+        <button id="markAllAbsentBtn" class="btn btn-sm btn-danger" title="Mark all students as absent">
+          ✕ All Absent
+        </button>
+        <button id="invertSelectionBtn" class="btn btn-sm btn-secondary" title="Invert selection">
+          🔄 Invert
+        </button>
+        <button id="resetSnapshotBtn" class="btn btn-sm btn-secondary" title="Clear all checkboxes (uncheck all)">
+          ↺ Clear All
+        </button>
+      </div>
+    </section>
+
+
+
+    <!-- Main Attendance Roster Container -->
+    <main class="matrix-container" id="studentViewContainer" aria-label="Student Attendance Grid">
+      <!-- Dynamic Student List Rendered by app.js -->
+    </main>
+
+    <!-- Submit Action Row -->
+    <section class="submit-action-row">
+      <button id="mainSubmitBtn" class="btn btn-primary btn-lg submit-pulse-btn" title="Submit attendance and view full summary with roll numbers">
+        <span>🚀</span> Submit Attendance &amp; View Summary
+      </button>
+    </section>
+
+    <!-- ==========================================================================
+         SUBMISSION SUMMARY SECTION (Appears only after Submit is clicked)
+         Shows the 4 summary metrics + explicit list of Present & Absent roll numbers
+         ========================================================================== -->
+    <section id="submissionSummarySection" class="submission-summary-container" style="display: none;" aria-label="Attendance Summary Results">
+      
+      <!-- Summary Header -->
+      <div class="summary-card-header">
+        <div class="summary-title-wrap">
+          <span class="summary-badge-status">✅ SUBMISSION RECORDED</span>
+          <h2 class="summary-main-heading">Attendance Summary &amp; Roll Number Breakdown</h2>
+          <p class="summary-subtext" id="summarySessionMeta">
+            Date: 2026-08-13 &bull; Period 1 &bull; 21CS204 - Design &amp; Analysis of Algorithms &bull; CSE-A
+          </p>
+        </div>
+        <div class="summary-header-btns">
+          <button id="summaryCopyWhatsappBtn" class="btn btn-success btn-sm" title="Copy Absentee List formatted for WhatsApp">
+            📲 Copy for WhatsApp
+          </button>
+          <button id="summaryExportCsvBtn" class="btn btn-secondary btn-sm" title="Download CSV Spreadsheet">
+            📥 CSV
+          </button>
+          <button id="summaryPrintBtn" class="btn btn-secondary btn-sm" title="Print Official Sheet">
+            🖨️ Print
+          </button>
+          <button id="reEditBtn" class="btn btn-secondary btn-sm" title="Modify Attendance">
+            ✏️ Edit Attendance
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Analytics 4 Metric Cards (Now shown on submit!) -->
+      <div class="analytics-bar">
+        <!-- Total Students -->
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-title">Total Strength</span>
+            <span class="stat-value" id="statTotal">70</span>
+            <span class="stat-sub">Enrolled in Section A</span>
+          </div>
+          <div class="stat-icon">👥</div>
+        </div>
+
+        <!-- Present Count -->
+        <div class="stat-card stat-present">
+          <div class="stat-info">
+            <span class="stat-title">Present Students</span>
+            <span class="stat-value" id="statPresent">16</span>
+            <span class="stat-sub" style="color: var(--present-color); font-weight: 600;">Active in class</span>
+          </div>
+          <div class="stat-icon">✅</div>
+        </div>
+
+        <!-- Absent Count -->
+        <div class="stat-card stat-absent">
+          <div class="stat-info">
+            <span class="stat-title">Absent Students</span>
+            <span class="stat-value" id="statAbsent">54</span>
+            <span class="stat-sub" style="color: var(--absent-color); font-weight: 600;">Require notification</span>
+          </div>
+          <div class="stat-icon">❌</div>
+        </div>
+
+        <!-- Attendance Percentage with Donut Ring -->
+        <div class="stat-card stat-percentage">
+          <div class="stat-info">
+            <span class="stat-title">Attendance Rate</span>
+            <span class="stat-value" id="statPercentage">22.9%</span>
+            <span class="stat-sub">Target: &ge; 75%</span>
+          </div>
+          <div class="progress-donut">
+            <svg viewBox="0 0 44 44" width="50" height="50">
+              <circle class="bg" cx="22" cy="22" r="18" />
+              <circle class="meter" id="progressCircle" cx="22" cy="22" r="18" stroke-dasharray="113.1 113.1" stroke-dashoffset="87.2" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Roll Numbers Breakdown Grid: Absentees & Presentees -->
+      <div class="numbers-breakdown-grid">
+        
+        <!-- Absent Students Box with Badge Chips and Copy Button -->
+        <div class="breakdown-card absent-breakdown-card">
+          <div class="breakdown-card-header">
+            <div class="breakdown-header-title">
+              <span class="breakdown-tag tag-absent">ABSENT</span>
+              <h3>Absent Student Numbers (<span id="absentRollsCount">0</span>)</h3>
+            </div>
+            <div class="breakdown-header-actions">
+              <button id="copyOnlyAbsenteesBtn" class="btn btn-danger" style="font-weight: 700; padding: 0.55rem 1.25rem;" title="Copy Absent Roll Numbers to Clipboard">
+                📋 Copy Absent Numbers
+              </button>
+            </div>
+          </div>
+          <div class="roll-chips-container" id="absentRollChips">
+            <!-- Injected dynamically by app.js -->
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- Bottom Floating Rapid Dock for Lightning-Fast Key-In -->
+  <aside class="rapid-dock" aria-label="Rapid Callout Controls">
+    <div class="dock-rapid-input">
+      <span style="font-size: 1.1rem;" aria-hidden="true">⚡</span>
+      <input type="text" id="dockInput" class="dock-input" placeholder="Quick Type Suffix (e.g. 35, 124, A15) + Enter" />
+      <span class="keyboard-hint">
+        Press <span class="kbd-badge">/</span> to focus
+      </span>
+    </div>
+
+    <div class="dock-actions">
+      <button id="pasteAbsenteesBtn" class="btn btn-secondary btn-sm" title="Paste multiple roll numbers at once">
+        📋 Paste Absentees
+      </button>
+      <button id="dockSubmitBtn" class="btn btn-primary btn-sm" title="Submit Attendance">
+        🚀 Submit
+      </button>
+      <span class="keyboard-hint" style="margin-left: 0.5rem;">
+        <span class="kbd-badge">Ctrl+S</span> Save
+      </span>
+    </div>
+  </aside>
+
+  <!-- Modal: Session History -->
+  <div class="modal-overlay" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="historyModalTitle">📜 Saved Attendance Records</h2>
+        <button class="btn btn-secondary btn-icon-only modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body" id="historyList">
+        <!-- Injected via app.js -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Bulk Paste Absentees -->
+  <div class="modal-overlay" id="pasteModal" role="dialog" aria-modal="true" aria-labelledby="pasteModalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="pasteModalTitle">📋 Paste Roll Numbers</h2>
+        <button class="btn btn-secondary btn-icon-only modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.875rem; color: var(--text-secondary);">
+          Paste roll numbers or last 2-4 digits separated by comma, space, or newline to mark them as <strong>ABSENT</strong>.
+        </p>
+        <textarea id="pasteInputText" rows="6" class="input-control" style="width: 100%; font-family: var(--font-mono); padding: 0.75rem;" placeholder="e.g. 241FA04035, 241FA04054, 4062, A15, E43"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close-btn">Cancel</button>
+        <button id="applyPasteBtn" class="btn btn-primary">Mark As Absent</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data and Application Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
