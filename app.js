@@ -756,22 +756,23 @@ function showToast(message, type = "info") {
 
 // --- Global UI Event Bindings ---
 function bindUIEvents() {
-  // Theme Toggle
-  document.getElementById("themeToggleBtn").addEventListener("click", toggleTheme);
-
   // Date input
   const dateInput = document.getElementById("dateInput");
-  dateInput.value = state.date;
-  dateInput.addEventListener("change", e => {
-    state.date = e.target.value;
-  });
+  if (dateInput) {
+    dateInput.value = state.date;
+    dateInput.addEventListener("change", e => {
+      state.date = e.target.value;
+    });
+  }
 
   // Tutorial checkbox
   const tutorialCheckbox = document.getElementById("tutorialCheckbox");
-  tutorialCheckbox.checked = state.isTutorial;
-  tutorialCheckbox.addEventListener("change", e => {
-    state.isTutorial = e.target.checked;
-  });
+  if (tutorialCheckbox) {
+    tutorialCheckbox.checked = state.isTutorial;
+    tutorialCheckbox.addEventListener("change", e => {
+      state.isTutorial = e.target.checked;
+    });
+  }
 
   // Period select
   const periodSelect = document.getElementById("periodSelect");
