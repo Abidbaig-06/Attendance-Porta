@@ -6,46 +6,45 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
-/* --- CSS Variables & Color Tokens --- */
+/* --- CSS Variables & Color Tokens (Clean White Theme) --- */
 :root {
-  /* Dark Theme (Default) */
-  --bg-primary: #0b0f19;
-  --bg-secondary: #111827;
-  --bg-card: rgba(17, 24, 39, 0.75);
-  --bg-card-hover: rgba(31, 41, 55, 0.85);
-  --bg-glass: rgba(15, 23, 42, 0.65);
-  --bg-input: #1f2937;
-  --bg-tertiary: #1e293b;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-glass: rgba(255, 255, 255, 0.95);
+  --bg-input: #ffffff;
+  --bg-tertiary: #f1f5f9;
 
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(99, 102, 241, 0.4);
-  --border-focus: #6366f1;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --border-focus: #2563eb;
 
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
   --text-muted: #64748b;
-  --text-inverse: #0f172a;
+  --text-inverse: #ffffff;
 
-  --accent-primary: #6366f1;
-  --accent-primary-hover: #4f46e5;
-  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-  --accent-glow: 0 0 25px rgba(99, 102, 241, 0.35);
+  --accent-primary: #2563eb;
+  --accent-primary-hover: #1d4ed8;
+  --accent-gradient: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  --accent-glow: 0 4px 15px rgba(37, 99, 235, 0.25);
 
-  --present-color: #10b981;
-  --present-bg: rgba(16, 185, 129, 0.12);
-  --present-border: rgba(16, 185, 129, 0.35);
-  --present-glow: 0 0 15px rgba(16, 185, 129, 0.3);
+  --present-color: #059669;
+  --present-bg: #ecfdf5;
+  --present-border: #a7f3d0;
+  --present-glow: 0 0 15px rgba(5, 150, 105, 0.15);
 
-  --absent-color: #ef4444;
-  --absent-bg: rgba(239, 68, 68, 0.08);
-  --absent-border: rgba(239, 68, 68, 0.25);
+  --absent-color: #dc2626;
+  --absent-bg: #fef2f2;
+  --absent-border: #fca5a5;
 
-  --od-color: #f59e0b;
-  --od-bg: rgba(245, 158, 11, 0.12);
-  --od-border: rgba(245, 158, 11, 0.35);
+  --od-color: #d97706;
+  --od-bg: #fffbeb;
+  --od-border: #fde68a;
 
-  --portal-blue: #2563eb;
-  --portal-item-bg: rgba(30, 41, 59, 0.6);
+  --portal-blue: #1d4ed8;
+  --portal-item-bg: #ffffff;
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -53,10 +52,10 @@
   --radius-xl: 24px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-glass: 0 4px 20px rgba(0, 0, 0, 0.04);
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -66,47 +65,6 @@
   --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   accent-color: var(--accent-primary);
-  color-scheme: dark;
-}
-
-[data-theme="light"] {
-  --bg-primary: #f1f5f9;
-  --bg-secondary: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-card-hover: #ffffff;
-  --bg-glass: rgba(255, 255, 255, 0.75);
-  --bg-input: #f8fafc;
-  --bg-tertiary: #e2e8f0;
-
-  --border-color: rgba(0, 0, 0, 0.09);
-  --border-hover: rgba(99, 102, 241, 0.5);
-  --border-focus: #4f46e5;
-
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --text-inverse: #ffffff;
-
-  --accent-primary: #4f46e5;
-  --accent-primary-hover: #4338ca;
-  --accent-glow: 0 0 20px rgba(79, 70, 229, 0.25);
-
-  --present-color: #059669;
-  --present-bg: rgba(5, 150, 105, 0.1);
-  --present-border: rgba(5, 150, 105, 0.35);
-
-  --absent-color: #dc2626;
-  --absent-bg: rgba(220, 38, 38, 0.08);
-  --absent-border: rgba(220, 38, 38, 0.25);
-
-  --portal-blue: #1d4ed8;
-  --portal-item-bg: #f8fafc;
-
-  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.1);
-  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-
   color-scheme: light;
 }
 

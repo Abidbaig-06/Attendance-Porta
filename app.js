@@ -17,7 +17,6 @@ const state = {
   viewMode: "matrix", // 'matrix' | 'cards' | 'table'
   filterMode: "all", // 'all' | 'present' | 'absent'
   searchQuery: "",
-  theme: localStorage.getItem("att_theme") || "dark",
   soundEnabled: localStorage.getItem("att_sound") !== "false",
   history: JSON.parse(localStorage.getItem("att_history") || "[]"),
   isSubmitted: false
@@ -39,18 +38,13 @@ class SoundFX {
   playCheck() {
     if (!state.soundEnabled) return;
     this.init();
-    if (!this.ctx) return;
-
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = "sine";
-      osc.frequency.setValueAtTime(587.33, this.ctx.currentTime); // D5
-      osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.08); // A5
-
-      gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+      osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
-
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start();
@@ -61,30 +55,23 @@ class SoundFX {
   playUncheck() {
     if (!state.soundEnabled) return;
     this.init();
-    if (!this.ctx) return;
-
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = "sine";
-      osc.frequency.setValueAtTime(440, this.ctx.currentTime); // A4
-      osc.frequency.exponentialRampToValueAtTime(293.66, this.ctx.currentTime + 0.08); // D4
-
-      gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
-
+      osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start();
-      osc.stop(this.ctx.currentTime + 0.08);
+      osc.stop(this.ctx.currentTime + 0.06);
     } catch (e) {}
   }
 
   playSuccess() {
     if (!state.soundEnabled) return;
     this.init();
-    if (!this.ctx) return;
-
     try {
       const now = this.ctx.currentTime;
       [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
@@ -107,28 +94,11 @@ const sfx = new SoundFX();
 
 // --- Initialization ---
 document.addEventListener("DOMContentLoaded", () => {
-  initTheme();
   initInitialAttendance();
   bindUIEvents();
   renderApp();
   showToast("Attendance Portal Ready with 70 Students", "info");
 });
-
-// Theme Setup
-function initTheme() {
-  document.documentElement.setAttribute("data-theme", state.theme);
-  const themeToggleBtn = document.getElementById("themeToggleBtn");
-  if (themeToggleBtn) {
-    themeToggleBtn.innerHTML = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
-  }
-}
-
-function toggleTheme() {
-  state.theme = state.theme === "dark" ? "light" : "dark";
-  localStorage.setItem("att_theme", state.theme);
-  initTheme();
-  showToast(`Switched to ${state.theme} mode`, "info");
-}
 
 // Initial Attendance: Start with all PRESENT (no ticks) on load/refresh
 function initInitialAttendance() {
