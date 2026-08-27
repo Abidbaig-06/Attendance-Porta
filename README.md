@@ -7,26 +7,27 @@ A modern, high-speed, interactive **Faculty Attendance Portal** built with pure 
 ## 🌟 Key Features
 
 1. **Clean Start on Load / Refresh**
-   - Whenever you open or refresh the portal, attendance starts completely **clean and clear (0 ticks / no checkboxes checked)**.
-   - Click <kbd>All Present</kbd> to mark all present, or click individual checkboxes / type roll numbers.
+   - Whenever you open or refresh the portal, attendance starts completely **clean and clear (0 ticks / all marked Present)**.
+   - **Tick = ABSENT**: Tapping any student puts a red checkmark marking them as **Absent**.
+   - Unticked boxes remain **Present**.
 
 2. **Exact 6-Column Matrix Layout**
-   - Faithfully reproduces the university portal layout from the reference image with 6 responsive columns.
-   - High-contrast checkbox states with distinct blue roll-number styling when marked present.
+   - Clean, high-contrast white layout with 6 responsive columns.
+   - High-contrast checkbox states with distinct red highlights when marked absent.
 
 3. **Supercharged Rapid Entry (Bottom Dock)**
    - **Quick Key-In**: Type the last 2-4 digits of a roll number (e.g. `35`, `124`, `A15`) and press <kbd>Enter</kbd> to immediately toggle attendance!
    - Supports multi-token key-in (e.g., `35, 54, 124` toggles all 3 simultaneously).
    - Press <kbd>/</kbd> anywhere to immediately focus the rapid entry box.
 
-4. **Real-time Live Analytics**
-   - Total Strength (70)
-   - Live Present & Absent counters
-   - Attendance percentage ring meter (Target &ge; 75%)
+4. **Submission Summary & Absent Roll Numbers**
+   - Reveals comprehensive summary cards only after clicking **🚀 Submit Attendance**.
+   - Displays all absent roll numbers in clean visual badge chips format.
+   - **One-Click Copy**: Dedicated **"📋 Copy Absent Numbers"** button to instantly copy all absent roll numbers to clipboard.
 
 5. **Instant Export & Communication Tools**
-   - 📲 **Copy Absentee List for WhatsApp/SMS**: Generates a pre-formatted message ready to broadcast to students/parents/department groups.
-   - 📥 **CSV/Excel Export**: Downloads structured `.csv` sheet with timestamps.
+   - 📲 **Copy Absentee List for WhatsApp/SMS**: Generates a pre-formatted message ready to broadcast.
+   - 📥 **Clean CSV Export**: Downloads structured `.csv` with only **Roll Number** and **Status**.
    - 🖨️ **Printable Official Sheet**: Clean, print-styled roster with date, period, and faculty signature line.
 
 6. **Web Audio Synthesizer**
@@ -36,10 +37,6 @@ A modern, high-speed, interactive **Faculty Attendance Portal** built with pure 
    - Save session records with <kbd>Ctrl+S</kbd>.
    - View, restore, and manage past attendance records in the History modal.
 
-8. **Dual Theme**
-   - Dark Obsidian theme with glowing accents.
-   - Clean Executive Light theme.
-
 ---
 
 ## 🚀 How to Run
@@ -48,7 +45,7 @@ Simply open `index.html` in any modern web browser (Google Chrome, Microsoft Edg
 
 ```bash
 # Using python
-python -m http.server 3000
+python -m http.server 8080
 
 # Or using npx serve
 npx serve .
@@ -58,6 +55,5 @@ npx serve .
 
 ## ⌨️ Keyboard Shortcuts
 - <kbd>/</kbd> : Focus the rapid roll-call input
-- <kbd>Ctrl</kbd> + <kbd>S</kbd> : Save current attendance session
-- <kbd>Space</kbd> / <kbd>Enter</kbd> on any roll item : Toggle attendance
->>>>>>> 145eae4 (Initial commit: College Faculty Attendance Portal with 70 student roll numbers)
+- <kbd>Ctrl</kbd> + <kbd>S</kbd> : Submit and save attendance session
+- <kbd>Space</kbd> / <kbd>Enter</kbd> on any roll item : Toggle attendance (tick = absent)
