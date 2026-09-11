@@ -8,7 +8,7 @@
 const state = {
   students: [...INITIAL_STUDENTS],
   attendance: {}, // { [rollNumber]: 'present' | 'absent' }
-  date: "2026-08-13",
+  date: new Date().toISOString().split("T")[0],
   isTutorial: false,
   period: "1",
   subject: DEFAULT_SETTINGS.courseCode + " - " + DEFAULT_SETTINGS.courseName,
@@ -175,7 +175,7 @@ function renderMatrixView(container, students) {
     html += `
       <div class="portal-item ${isAbsent ? 'checked' : ''}" 
            data-roll="${student.roll}" 
-           title="${student.name || student.roll} (Tick = Absent)"
+           title="${index + 1}. ${student.name} (${student.roll}) - Click to toggle Absent"
            tabindex="0"
            role="checkbox"
            aria-checked="${isAbsent}">
@@ -184,7 +184,10 @@ function renderMatrixView(container, students) {
                data-roll="${student.roll}" 
                ${isAbsent ? 'checked' : ''} 
                tabindex="-1" />
-        <span class="portal-roll-text">${student.roll}</span>
+        <div class="portal-roll-details">
+          <span class="portal-roll-text">${student.roll}</span>
+          <span class="portal-name-text">${student.name}</span>
+        </div>
         <span class="student-seq">#${index + 1}</span>
       </div>
     `;
@@ -438,7 +441,7 @@ function updateSummaryData() {
     sessionMeta.textContent = `Date: ${state.date} • Period ${state.period} ${state.isTutorial ? '(Tutorial)' : ''} • ${state.subject} • ${state.section} • Faculty: ${state.facultyName}`;
   }
 
-  // 3. Populate Absent Roll Chips ("with their numbers")
+  // 3. Populate Absent Roll Chips ("with their numbers & names")
   const absentContainer = document.getElementById("absentRollChips");
   const absentCountEl = document.getElementById("absentRollsCount");
   if (absentCountEl) absentCountEl.textContent = absentCount;
@@ -448,9 +451,10 @@ function updateSummaryData() {
       absentContainer.innerHTML = `<div class="empty-chips-msg">🎉 Zero Absentees! All ${total} students are present.</div>`;
     } else {
       absentContainer.innerHTML = absentStudents.map(s => `
-        <span class="roll-chip roll-chip-absent" title="${s.name || s.roll}">
+        <span class="roll-chip roll-chip-absent" title="${s.name} (${s.roll})">
           <span>❌</span>
-          <span>${s.roll}</span>
+          <span style="font-weight: 700;">${s.roll}</span>
+          <span style="opacity: 0.85; font-size: 0.8em; margin-left: 0.35rem;">(${s.name})</span>
         </span>
       `).join("");
     }
@@ -531,25 +535,29 @@ function handleRapidInput(text) {
 
 // --- WhatsApp / SMS Copy Generator ---
 function copyAbsenteeList() {
-  const absentees = state.students
-    .filter(s => state.attendance[s.roll] === "absent")
-    .map(s => s.roll);
-
+  const absentees = state.students.filter(s => state.attendance[s.roll] === "absent");
   const presentCount = state.students.length - absentees.length;
   const percentage = ((presentCount / state.students.length) * 100).toFixed(1);
 
+  const rollOnlyList = absentees.map(s => s.roll).join(", ");
+  const detailedList = absentees.length > 0
+    ? absentees.map((s, i) => `${i + 1}. ${s.roll} - ${s.name}`).join("\n")
+    : "None (100% Present! 🎉)";
+
   const text = 
-`📌 *COLLEGE ATTENDANCE REPORT*
+`📌 *VFSTR :: Vadlamudi - ATTENDANCE REPORT*
+🏫 *B.Tech CSE - III Year I Sem (Section 1)*
 📅 *Date:* ${state.date} | *Period:* ${state.period} ${state.isTutorial ? '(Tutorial)' : ''}
-📚 *Subject:* ${state.subject}
-🏫 *Section:* ${state.section}
-👨‍🏫 *Faculty:* ${state.facultyName}
+📚 *Course:* ${state.subject}
 📊 *Total:* ${state.students.length} | *Present:* ${presentCount} | *Absent:* ${absentees.length} (${percentage}%)
 
-❌ *ABSENTEES LIST (${absentees.length}):*
-${absentees.length > 0 ? absentees.join(", ") : "None (100% Present! 🎉)"}
+❌ *ABSENT ROLL NUMBERS (${absentees.length}):*
+${rollOnlyList || "None"}
 
-_Generated via Attendance Portal_`;
+📋 *STUDENT NAME BREAKDOWN:*
+${detailedList}
+
+_Generated via Faculty Attendance Portal_`;
 
   navigator.clipboard.writeText(text).then(() => {
     sfx.playSuccess();
@@ -561,14 +569,16 @@ _Generated via Attendance Portal_`;
 
 function copyPresentList() {
   const presentees = state.students
-    .filter(s => state.attendance[s.roll] === "present")
-    .map(s => s.roll);
+    .filter(s => state.attendance[s.roll] === "present");
+
+  const formattedList = presentees.map((s, i) => `${i + 1}. ${s.roll} - ${s.name}`).join("\n");
 
   const text = 
 `✅ *PRESENT STUDENTS LIST (${presentees.length}/${state.students.length})*
+🏫 *VFSTR - B.Tech CSE III-I Sec 1*
 📅 Date: ${state.date} | Period: ${state.period} | Course: ${state.subject}
 
-${presentees.join(", ")}`;
+${formattedList}`;
 
   navigator.clipboard.writeText(text).then(() => {
     sfx.playSuccess();
@@ -576,25 +586,114 @@ ${presentees.join(", ")}`;
   });
 }
 
-// --- Clean CSV Export (Only Roll Number & Status) ---
+// --- Exact CSV Export matching the template (Register Number, Name, PERIOD No :, P/A) ---
 function exportCSV() {
-  const headers = ["Roll Number", "Status"];
-  const rows = state.students.map(s => [
-    `"${s.roll}"`,
-    `"${state.attendance[s.roll].toUpperCase()}"`
-  ]);
+  const headers = ["Register Number", "Name", "PERIOD No :", "P/A"];
 
-  const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-  const encodedUri = encodeURI(csvContent);
+  const studentRows = state.students.map(s => {
+    const isPresent = state.attendance[s.roll] === "present";
+    const statusCode = isPresent ? "P" : "A";
+    return [
+      `"${s.roll}"`,
+      `"${s.name}"`,
+      `"${state.period}"`,
+      `"${statusCode}"`
+    ].join(",");
+  });
+
+  const fullCsv = "\uFEFF" + headers.map(h => `"${h}"`).join(",") + "\n" + studentRows.join("\n");
+  
+  const blob = new Blob([fullCsv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
+  link.setAttribute("href", url);
   link.setAttribute("download", `Attendance_${state.date}_Period${state.period}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 
   sfx.playSuccess();
-  showToast("📥 Exported Roll Numbers CSV successfully!", "success");
+  showToast("📥 Exported CSV (Register Number, Name, PERIOD No :, P/A)!", "success");
+}
+
+// --- Native Excel (.xls) Export matching the exact Excel format from screenshot ---
+function exportExcel() {
+  const tableRows = state.students.map(s => {
+    const isPresent = state.attendance[s.roll] === "present";
+    const statusCode = isPresent ? "P" : "A";
+    return `
+      <tr>
+        <td style="font-family: Calibri, Arial, sans-serif; font-size: 11pt; border: 1px solid #d4d4d4; padding: 4px 8px; mso-number-format:'\\@';">${s.roll}</td>
+        <td style="font-family: Calibri, Arial, sans-serif; font-size: 11pt; border: 1px solid #d4d4d4; padding: 4px 8px;">${s.name}</td>
+        <td style="font-family: Calibri, Arial, sans-serif; font-size: 11pt; border: 1px solid #d4d4d4; padding: 4px 8px; text-align: center;">${state.period}</td>
+        <td style="font-family: Calibri, Arial, sans-serif; font-size: 11pt; border: 1px solid #d4d4d4; padding: 4px 8px; text-align: center; font-weight: bold; color: ${isPresent ? '#006100' : '#c00000'};">${statusCode}</td>
+      </tr>
+    `;
+  }).join("");
+
+  const excelTemplate = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+      <!--[if gte mso 9]>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>Attendance</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+      <style>
+        table { border-collapse: collapse; width: 100%; }
+        th {
+          background-color: #174b75 !important;
+          color: #ffffff !important;
+          font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+          font-size: 11pt;
+          font-weight: bold;
+          border: 1px solid #0d3353;
+          padding: 6px 12px;
+          text-align: left;
+        }
+      </style>
+    </head>
+    <body>
+      <table>
+        <thead>
+          <tr>
+            <th style="background-color: #174b75; color: #ffffff; width: 160px;">Register Number</th>
+            <th style="background-color: #174b75; color: #ffffff; width: 320px;">Name</th>
+            <th style="background-color: #174b75; color: #ffffff; width: 130px; text-align: center;">PERIOD No :</th>
+            <th style="background-color: #174b75; color: #ffffff; width: 80px; text-align: center;">P/A</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([excelTemplate], { type: "application/vnd.ms-excel;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `Attendance_${state.date}_Period${state.period}.xls`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  sfx.playSuccess();
+  showToast("📊 Exported Official Excel (.xls) matching the table format!", "success");
 }
 
 // --- Session History & Persistence ---
@@ -833,6 +932,7 @@ function bindUIEvents() {
 
   // Summary Card Actions
   document.getElementById("summaryCopyWhatsappBtn")?.addEventListener("click", copyAbsenteeList);
+  document.getElementById("summaryExportExcelBtn")?.addEventListener("click", exportExcel);
   document.getElementById("summaryExportCsvBtn")?.addEventListener("click", exportCSV);
   document.getElementById("summaryPrintBtn")?.addEventListener("click", printAttendanceSheet);
   document.getElementById("reEditBtn")?.addEventListener("click", editAttendance);

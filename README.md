@@ -1,59 +1,76 @@
-# 🎓 College Faculty Attendance Portal
+# 🎓 Faculty Attendance Portal — Full-Stack (React + Vite + Express)
 
-A modern, high-speed, interactive **Faculty Attendance Portal** built with pure HTML5, CSS3, and modern ES6 JavaScript. Preloaded with all **70 student roll numbers** (`241FA04035` through `241FA04F95`).
-
----
-
-## 🌟 Key Features
-
-1. **Clean Start on Load / Refresh**
-   - Whenever you open or refresh the portal, attendance starts completely **clean and clear (0 ticks / all marked Present)**.
-   - **Tick = ABSENT**: Tapping any student puts a red checkmark marking them as **Absent**.
-   - Unticked boxes remain **Present**.
-
-2. **Exact 6-Column Matrix Layout**
-   - Clean, high-contrast white layout with 6 responsive columns.
-   - High-contrast checkbox states with distinct red highlights when marked absent.
-
-3. **Supercharged Rapid Entry (Bottom Dock)**
-   - **Quick Key-In**: Type the last 2-4 digits of a roll number (e.g. `35`, `124`, `A15`) and press <kbd>Enter</kbd> to immediately toggle attendance!
-   - Supports multi-token key-in (e.g., `35, 54, 124` toggles all 3 simultaneously).
-   - Press <kbd>/</kbd> anywhere to immediately focus the rapid entry box.
-
-4. **Submission Summary & Absent Roll Numbers**
-   - Reveals comprehensive summary cards only after clicking **🚀 Submit Attendance**.
-   - Displays all absent roll numbers in clean visual badge chips format.
-   - **One-Click Copy**: Dedicated **"📋 Copy Absent Numbers"** button to instantly copy all absent roll numbers to clipboard.
-
-5. **Instant Export & Communication Tools**
-   - 📲 **Copy Absentee List for WhatsApp/SMS**: Generates a pre-formatted message ready to broadcast.
-   - 📥 **Clean CSV Export**: Downloads structured `.csv` with only **Roll Number** and **Status**.
-   - 🖨️ **Printable Official Sheet**: Clean, print-styled roster with date, period, and faculty signature line.
-
-6. **Web Audio Synthesizer**
-   - Built-in lightweight sound engine providing subtle mechanical click & chime audio feedback (can be toggled on/off).
-
-7. **Session Storage & History**
-   - Save session records with <kbd>Ctrl+S</kbd>.
-   - View, restore, and manage past attendance records in the History modal.
+A high-performance, modern web application designed for university faculty to conduct, record, and analyze student attendance with rapid roll-call workflows, instant acoustic feedback, and persistent backend storage.
 
 ---
 
-## 🚀 How to Run
+## ⚡ Tech Stack & Architecture
 
-Simply open `index.html` in any modern web browser (Google Chrome, Microsoft Edge, Firefox, Brave, Safari) or run a local static server:
+- **Frontend**: [React 18](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Backend**: [Node.js](https://nodejs.org/) + [Express.js](https://expressjs.com/) REST API
+- **Audio Feedback**: Web Audio Synthesizer (sine & triangle oscillator tones)
+- **Styling**: Vanilla CSS Design System with Glassmorphism, smooth animations & dark/light accents
+- **Storage**: Persistent JSON database (`server/data/students.json` & `server/data/sessions.json`) with client-side `localStorage` resilience fallback
 
+---
+
+## 🚀 Getting Started
+
+### 1. Install Dependencies
 ```bash
-# Using python
-python -m http.server 8080
+npm install
+```
 
-# Or using npx serve
-npx serve .
+### 2. Run Full-Stack Development Server
+Starts both the Express backend API (`http://localhost:5000`) and Vite frontend (`http://localhost:3000`) concurrently:
+```bash
+npm run dev
+```
+
+### 3. Build for Production
+```bash
+npm run build
 ```
 
 ---
 
-## ⌨️ Keyboard Shortcuts
-- <kbd>/</kbd> : Focus the rapid roll-call input
-- <kbd>Ctrl</kbd> + <kbd>S</kbd> : Submit and save attendance session
-- <kbd>Space</kbd> / <kbd>Enter</kbd> on any roll item : Toggle attendance (tick = absent)
+## 🧭 Application Features
+
+1. **6-Column Portal Matrix View**:
+   - Matches university faculty portal layout.
+   - **Tick = Absent** convention: clicking any student marks them absent with clear visual differentiation.
+2. **Multiple View Modes**:
+   - **▦ Matrix**: High-speed grid with sequential `#index` and roll numbers.
+   - **📇 Cards**: Visual student card view with avatar initials.
+   - **📋 Table**: Tabular layout with direct action buttons.
+3. **Real-Time Analytics & Donut Gauge**:
+   - Dynamic SVG donut meter calculating exact attendance percentage.
+   - Instant metrics for Total Strength, Present, and Absent.
+4. **Post-Submission Summary**:
+   - Clickable absentee chips with roll numbers and student names.
+   - Expandable present student roster drawer.
+   - Instant **Copy for WhatsApp** formatted report.
+   - Instant **Download CSV / Excel** export.
+5. **Rapid Key-In Absent Dialog**:
+   - Type or paste space/comma-separated roll numbers or last 2–4 digits (e.g. `35, 54, 62`) to immediately mark them absent.
+6. **Session History & Persistence**:
+   - View, restore, and delete previously conducted attendance sessions.
+   - Sessions sync with the Express backend REST API.
+7. **Web Audio Synthesizer**:
+   - Sine wave click tones on check/uncheck and success melody upon submission.
+   - Sound toggle button (`🔊 Sound ON` / `🔇 Sound OFF`).
+
+---
+
+## 🔌 Backend API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health` | Service health status and uptime |
+| `GET` | `/api/students` | Get all 70 students or filter by `?section=` or `?search=` |
+| `POST` | `/api/students` | Add or update student details |
+| `GET` | `/api/sessions` | Retrieve all saved attendance sessions |
+| `GET` | `/api/sessions/:id` | Get single session details |
+| `POST` | `/api/sessions` | Save a new attendance submission |
+| `DELETE` | `/api/sessions/:id` | Delete an attendance session |
+| `GET` | `/api/stats/overview`| Aggregate portal analytics |
